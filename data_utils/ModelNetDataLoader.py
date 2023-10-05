@@ -47,6 +47,12 @@ def farthest_point_sample(point, npoint):
 
 
 class ModelNetDataLoader(Dataset):
+    """
+    Custom dataset은 아래 3가지 함수를 필수적으로 갖고 있어야 한다.
+    1. __init__()
+    2. __len()__
+    3. __getitem__()
+    """
     def __init__(self, root, args, split='train', process_data=False):
         self.root = root
         self.npoints = args.num_point

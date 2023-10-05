@@ -118,24 +118,24 @@ def main(args):
     log_string('Load dataset ...')
     data_path = 'data/modelnet40_normal_resampled/'
 
-    train_dataset = ModelNetDataLoader(root=data_path, args=args, split='train', process_data=args.process_data)
+    train_dataset = ModelNetDataLoader(root=data_path, args=args, split='train', process_data=args.process_data) # ModelNetDataLoader: Custom dataset을 반환하는 클래스
     test_dataset = ModelNetDataLoader(root=data_path, args=args, split='test', process_data=args.process_data)
-    trainDataLoader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=10, drop_last=True)
+    trainDataLoader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=10, drop_last=True) # DataLoader는 utils에 있는 거 그냥 사용하면 됨!
     testDataLoader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=10)
 
     '''MODEL LOADING'''
     num_class = args.num_category
     model = importlib.import_module(args.model)
-    shutil.copy('./models/%s.py' % args.model, str(exp_dir))
+    shutil.copy('./models/%s.py' % args.model, str(exp_dir)) # shutil.copy()로 첫번째 인자를 두 번째 인자로 복사
     shutil.copy('models/pointnet2_utils.py', str(exp_dir))
     shutil.copy('./train_classification.py', str(exp_dir))
 
-    classifier = model.get_model(num_class, normal_channel=args.use_normals)
+    classifier = model.get_model(num_class, normal_channel=args.use_normals) # 확실하지는 않지만, 모델 불러오는 코드인 거 같음.
     criterion = model.get_loss()
     classifier.apply(inplace_relu)
 
-    if not args.use_cpu:
-        classifier = classifier.cuda()
+    if not args.use_cpu: # Cuda 쓰는거면 if문 안에 실행
+        classifier = classifier.cuda() # GPU에 올리기
         criterion = criterion.cuda()
 
     try:
@@ -158,7 +158,7 @@ def main(args):
     else:
         optimizer = torch.optim.SGD(classifier.parameters(), lr=0.01, momentum=0.9)
 
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.7)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.7) # Learning rate scheduler
     global_epoch = 0
     global_step = 0
     best_instance_acc = 0.0
@@ -227,6 +227,6 @@ def main(args):
     logger.info('End of training...')
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # Step 1
     args = parse_args()
     main(args)
