@@ -114,7 +114,7 @@ def main(args):
     log_string('PARAMETER ...')
     log_string(args)
 
-    '''DATA LOADING'''
+    '''Step 2: 데이터 준비'''
     log_string('Load dataset ...')
     data_path = 'data/modelnet40_normal_resampled/'
 
@@ -123,7 +123,7 @@ def main(args):
     trainDataLoader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=10, drop_last=True) # DataLoader는 utils에 있는 거 그냥 사용하면 됨!
     testDataLoader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=10)
 
-    '''MODEL LOADING'''
+    '''Step 3: 모델 불러오기 (미리 정의된 모델 사용)'''
     num_class = args.num_category
     model = importlib.import_module(args.model)
     shutil.copy('./models/%s.py' % args.model, str(exp_dir)) # shutil.copy()로 첫번째 인자를 두 번째 인자로 복사
@@ -164,7 +164,7 @@ def main(args):
     best_instance_acc = 0.0
     best_class_acc = 0.0
 
-    '''TRANING'''
+    '''Step 4: 학습'''
     logger.info('Start training...')
     for epoch in range(start_epoch, args.epoch):
         log_string('Epoch %d (%d/%s):' % (global_epoch + 1, epoch + 1, args.epoch))
@@ -173,7 +173,7 @@ def main(args):
 
         scheduler.step()
         for batch_id, (points, target) in tqdm(enumerate(trainDataLoader, 0), total=len(trainDataLoader), smoothing=0.9):
-            optimizer.zero_grad()
+            optimizer.zero_grad() # 항상 먼저 gradient 값들을 0으로 초기화하는 작업을 해줘야 한다.
 
             points = points.data.numpy()
             points = provider.random_point_dropout(points)
@@ -198,7 +198,7 @@ def main(args):
         train_instance_acc = np.mean(mean_correct)
         log_string('Train Instance Accuracy: %f' % train_instance_acc)
 
-        with torch.no_grad():
+        with torch.no_grad(): # gradient 계산 안하기
             instance_acc, class_acc = test(classifier.eval(), testDataLoader, num_class=num_class)
 
             if (instance_acc >= best_instance_acc):

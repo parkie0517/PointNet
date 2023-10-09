@@ -15,10 +15,10 @@ warnings.filterwarnings('ignore')
 
 
 def pc_normalize(pc):
-    centroid = np.mean(pc, axis=0)
-    pc = pc - centroid
-    m = np.max(np.sqrt(np.sum(pc**2, axis=1)))
-    pc = pc / m
+    centroid = np.mean(pc, axis=0) # 모든 point들의 x, y, z에 대해 각각의 평균을 구한다. 평균 값은 모든 point의 중심점이다.
+    pc = pc - centroid # 그리고 평균을 뺀다.
+    m = np.max(np.sqrt(np.sum(pc**2, axis=1))) # 먼지는 정확하게 모르겠지만, x, y, z 중에서 가장 거리가 먼 값을 구한다.
+    pc = pc / m # 그걸 나눠준다.
     return pc
 
 
@@ -132,9 +132,9 @@ class ModelNetDataLoader(Dataset):
             else:
                 point_set = point_set[0:self.npoints, :]
                 
-        point_set[:, 0:3] = pc_normalize(point_set[:, 0:3])
+        point_set[:, 0:3] = pc_normalize(point_set[:, 0:3]) # pc_normalize() 함수는 point들 normalize해주기
         if not self.use_normals:
-            point_set = point_set[:, 0:3]
+            point_set = point_set[:, 0:3] # normal vector를 사용하지 않는 경우, point_set의 첫 3 column만 (x, y, z) 사용하기.
 
         return point_set, label[0]
 
